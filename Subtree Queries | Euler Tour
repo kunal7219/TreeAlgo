@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+ 
+/* UTILS */
+#define MOD 1000000007
+#define PI 3.1415926535897932384626433832795
+
+/* clang-format on */
+const int max_n=200001;
+vector<int>adj[max_n];
+vector<int>val,st,en,lt;
+int timer;
+vector<ll> fTree;
+void dfs(int node,int par){
+	st[node]=timer;
+	lt[timer++]=val[node];
+	for(auto it:adj[node]){
+		if(par!=it)
+		dfs(it,node);
+	}
+	en[node]=timer;
+	lt[timer++]=val[node];
+}
+void addFt(int i,ll val){
+	while(i<fTree.size()){
+		fTree[i]+=val;
+		i+=i&(-i);
+	}
+	return;
+}
+ll sumFt(int i){
+	ll ans=0;
+	while(i>0){
+		ans+=fTree[i];
+		i-=i&(-i);
+	}
+	return ans;
+}
+void solve(){
+	int n,q;
+	cin>>n>>q;
+	val.resize(n+1);
+	st.resize(n+1);
+	en.resize(n+1);
+	lt.resize(n*2+5);
+	timer=1;
+	for(int i=1;i<=n;i++)cin>>val[i];
+	for(int i=0;i<n-1;i++){
+		int a,b;
+		cin>>a>>b;
+		adj[a].push_back(b);
+		adj[b].push_back(a);
+	}
+	dfs(1,0);
+	fTree.resize(lt.size());
+	for(int i=1;i<=n;i++){
+		addFt(st[i],val[i]);
+		addFt(en[i],val[i]);
+	}
+	while(q--){
+		int x;
+		cin>>x;
+		if(x==1){
+			int node,value;
+			cin>>node>>value;
+			ll delta = value;
+			delta-=val[node];
+			addFt(st[node],delta);
+			addFt(en[node],delta);
+			val[node]=value;
+		}
+		else{
+			int node;
+			cin>>node;
+			int u=st[node];
+			int v=en[node];
+			ll sum=sumFt(v)-sumFt(u-1);
+			cout<<sum/2<<endl;
+		}
+	}
+	}
+/* Main()  function */
+int main()
+{
+	#ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+#endif
+ 
+solve();
+ 
+return 0;
+}
