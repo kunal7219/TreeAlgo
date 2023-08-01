@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+vector<vector<int>> dp;
+const int LOG=20;
+const int max_n=200001;
+vector<int>adj[max_n];
+vector<int> depth;
+void dfs(int a,int par){
+    for(auto b:adj[a]){
+        if(b==par)continue;
+        dp[b][0]=a;
+        depth[b]=depth[a]+1;
+        dfs(b,a);
+    }
+}
+int lca(int a,int b){
+
+    if(depth[a]<depth[b])swap(a,b);
+
+        int k=depth[a]-depth[b];
+        for(int j=LOG-1;j>=0;j--){
+            if(k&(1<<j)){
+                a=dp[a][j];
+            }
+        }
+        if(a==b){
+        return a;
+        }
+        for(int j=LOG-1;j>=0;j--){
+            if(dp[a][j]!=-1 && dp[a][j]!=dp[b][j]){
+                a=dp[a][j];
+                b=dp[b][j];
+            }
+        }
+        return dp[a][0];
+}
+void dfs_value(int src,int par,vector<int>& value){
+    int x=value[src];
+    for(auto it:adj[src]){
+        if(it==par)continue;
+        dfs_value(it,src,value);
+        x+=value[it];
+    }
+    value[src]=x;
+    return;
+}
+void solve(){
+    int n,q;
+    cin>>n>>q;
+    depth.resize(n,0);
+    dp.resize(n,vector<int>(LOG,-1));
+    vector<int> value(n,0);
+    for(int i=0;i<n-1;i++){
+        int x,y;cin>>x>>y;
+        x--;y--;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+    dfs(0,-1);
+    for(int j=1;j<=LOG;j++){
+        for(int i=0;i<n;i++){
+            if(dp[i][j-1]!=-1)
+            dp[i][j]=dp[dp[i][j-1]][j-1];
+        }
+    }
+    while(q--){
+        int a,b;
+        cin>>a>>b;
+        a--,b--;
+        value[a]+=1;
+        value[b]+=1;
+        int p=lca(a,b);
+        int up=dp[p][0];
+        value[p]-=1;
+        if(up!=-1)
+        value[up]-=1;
+    }
+        dfs_value(0,-1,value);
+        for(int i=0;i<n;i++)cout<<value[i]<<" ";
+    }
+/* Main()  function */
+int main()
+{
+solve();
+return 0;
+}
